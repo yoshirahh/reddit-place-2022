@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -68,4 +69,18 @@ func GetRedditOAuthToken() {
 
 	authUrl := oauthConfig.AuthCodeURL(oauthStateString)
 	browser.OpenURL(authUrl)
+}
+
+// Use this to handle navigation to /callback from above
+func HandleAuthCallback(r *http.Request) error {
+	payload, err := oauthConfig.Exchange(oauth2.NoContext, r.FormValue("code"))
+
+	if err != nil {
+		return fmt.Errorf("code exchange failed: %s", err.Error())
+	}
+
+	log.Printf("Bearer token: %s\n", payload.AccessToken)
+	log.Printf("Refresh token: %s\n", payload.RefreshToken)
+
+	return nil
 }
